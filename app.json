@@ -1,0 +1,72 @@
+{
+  "expo": {
+    "name": "BirthdayBuddy",
+    "slug": "BirthdayBuddy",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "birthdaybuddy",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "BirthdayBuddy uses Face ID to keep your friends' birthdays private and secure.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "com.eshaan.birthdaybuddy"
+    },
+    "supportsTablet": true,
+    "plugins": [
+      "expo-secure-store",
+      "expo-router"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "42cd51d5-5fef-4a0c-a846-2cf968b81d1f"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/42cd51d5-5fef-4a0c-a846-2cf968b81d1f"
+    },
+    "android": {}
+  },
+  "android": {
+    "adaptiveIcon": {
+      "backgroundColor": "#E6F4FE",
+      "foregroundImage": "./assets/images/android-icon-foreground.png",
+      "backgroundImage": "./assets/images/android-icon-background.png",
+      "monochromeImage": "./assets/images/android-icon-monochrome.png"
+    },
+    "edgeToEdgeEnabled": true,
+    "predictiveBackGestureEnabled": false
+  },
+  "web": {
+    "output": "static",
+    "favicon": "./assets/images/favicon.png"
+  },
+  "plugins": [
+    "expo-router",
+    [
+      "expo-splash-screen",
+      {
+        "image": "./assets/images/splash-icon.png",
+        "imageWidth": 200,
+        "resizeMode": "contain",
+        "backgroundColor": "#ffffff",
+        "dark": {
+          "backgroundColor": "#000000"
+        }
+      }
+    ],
+    "expo-font"
+  ],
+  "experiments": {
+    "typedRoutes": true,
+    "reactCompiler": true
+  }
+}
