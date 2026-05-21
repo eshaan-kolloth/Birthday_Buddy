@@ -2,12 +2,12 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC00jRqsmnU6OI1fvQWldMO_cBdag79Fh4",
-  authDomain: "birthdaybuddy-7ebac.firebaseapp.com",
-  projectId: "birthdaybuddy-7ebac",
-  storageBucket: "birthdaybuddy-7ebac.firebasestorage.app",
-  messagingSenderId: "644507290316",
-  appId: "1:644507290316:web:c4a72491f223c938b3d069",
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);
