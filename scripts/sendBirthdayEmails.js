@@ -71,7 +71,11 @@ async function main() {
 
   console.log(`Running for ${todayMonth}/${todayDay}...`);
 
-  const snapshot = await db.collection("birthdays").get();
+  const snapshot = await db
+    .collection("users")
+    .doc("eshaan")
+    .collection("birthdays")
+    .get();
 
   if (snapshot.empty) {
     console.log("No birthdays found.");
