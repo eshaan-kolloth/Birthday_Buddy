@@ -1,0 +1,30 @@
+name: Send Birthday Emails
+
+on:
+  schedule:
+    - cron: "30 3 * * *" # Runs at 9:00 AM IST every day
+  workflow_dispatch: # Allows manual trigger from GitHub
+
+jobs:
+  send-emails:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install firebase-admin
+
+      - name: Run birthday email script
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          EMAILJS_SERVICE_ID: ${{ secrets.EMAILJS_SERVICE_ID }}
+          EMAILJS_TEMPLATE_ID: ${{ secrets.EMAILJS_TEMPLATE_ID }}
+          EMAILJS_PUBLIC_KEY: ${{ secrets.EMAILJS_PUBLIC_KEY }}
+        run: node scripts/sendBirthdayEmails.js
