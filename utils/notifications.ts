@@ -9,6 +9,8 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -96,7 +98,7 @@ export const checkAndSendBirthdayEmails = async (
       const alreadySent = await AsyncStorage.getItem(sentKey);
       if (!alreadySent) {
         try {
-          await sendBirthdayEmail(birthday);
+          await sendBirthdayEmail(birthday, true);
           await AsyncStorage.setItem(sentKey, "1");
           console.log("Sent today email for:", birthday.name);
         } catch (e) {
@@ -112,7 +114,7 @@ export const checkAndSendBirthdayEmails = async (
       const alreadySent = await AsyncStorage.getItem(sentKey);
       if (!alreadySent) {
         try {
-          await sendBirthdayEmail(birthday);
+          await sendBirthdayEmail(birthday, false);
           await AsyncStorage.setItem(sentKey, "1");
           console.log("Sent tomorrow email for:", birthday.name);
         } catch (e) {
