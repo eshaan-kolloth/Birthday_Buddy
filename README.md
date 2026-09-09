@@ -3,19 +3,6 @@
 ```
 ██████╗ ██╗██████╗ ████████╗██╗  ██╗██████╗  █████╗ ██╗   ██╗
 ██╔══██╗██║██╔══██╗╚══██╔══╝██║  ██║██╔══██╗██╔══██╗╚██╗ ██╔╝
-<<<<<<< Updated upstream
-██████╔╝██║██████╔╝   ██║   ███████║██║  ██║███████║ ╚████╔╝ 
-██╔══██╗██║██╔══██╗   ██║   ██╔══██║██║  ██║██╔══██║  ╚██╔╝  
-██████╔╝██║██║  ██║   ██║   ██║  ██║██████╔╝██║  ██║   ██║   
-╚═════╝ ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═════╝ ╚═╝  ╚═╝   ╚═╝  
-
-██████╗ ██╗   ██╗██████╗ ██████╗ ██╗   ██╗
-██╔══██╗██║   ██║██╔══██╗██╔══██╗╚██╗ ██╔╝
-██████╔╝██║   ██║██║  ██║██║  ██║ ╚████╔╝ 
-██╔══██╗██║   ██║██║  ██║██║  ██║  ╚██╔╝  
-██████╔╝╚██████╔╝██████╔╝██████╔╝   ██║   
-╚═════╝  ╚═════╝ ╚═════╝ ╚═════╝    ╚═╝   
-=======
 ██████╔╝██║██████╔╝   ██║   ███████║██║  ██║███████║ ╚████╔╝
 ██╔══██╗██║██╔══██╗   ██║   ██╔══██║██║  ██║██╔══██║  ╚██╔╝
 ██████╔╝██║██║  ██║   ██║   ██║  ██║██████╔╝██║  ██║   ██║
@@ -27,7 +14,6 @@
 ██╔══██╗██║   ██║██║  ██║██║  ██║  ╚██╔╝
 ██████╔╝╚██████╔╝██████╔╝██████╔╝   ██║
 ╚═════╝  ╚═════╝ ╚═════╝ ╚═════╝    ╚═╝
->>>>>>> Stashed changes
 ```
 
 ### `[ NEVER FORGET A BIRTHDAY AGAIN ]`
@@ -35,17 +21,13 @@
 <br/>
 
 ![Platform](https://img.shields.io/badge/Platform-React%20Native-00E5FF?style=for-the-badge&logoColor=white&labelColor=050508)
-![Framework](https://img.shields.io/badge/Framework-Expo%20SDK%2054-B44FFF?style=for-the-badge&logoColor=white&labelColor=050508)
+![Framework](https://img.shields.io/badge/Framework-Expo%20SDK%2057-B44FFF?style=for-the-badge&logoColor=white&labelColor=050508)
 ![Database](https://img.shields.io/badge/Cloud-Firebase-00E5FF?style=for-the-badge&logoColor=white&labelColor=050508)
 ![License](https://img.shields.io/badge/License-MIT-00FF88?style=for-the-badge&logoColor=white&labelColor=050508)
 
 <br/>
 
-<<<<<<< Updated upstream
-> *"A cyberpunk-themed birthday tracker that auto-schedules notifications, sends email reminders, and syncs to the cloud — all without you lifting a finger."*
-=======
 > _"A cyberpunk-themed birthday tracker that auto-schedules notifications, sends email reminders, and syncs to the cloud — all without you lifting a finger."_
->>>>>>> Stashed changes
 
 <br/>
 
@@ -80,15 +62,6 @@
 
 **BirthdayBuddy** is a mobile app built with React Native + Expo that makes sure you never miss a birthday. Behind the slick neon interface lives a powerful system:
 
-<<<<<<< Updated upstream
-- 🔒 **Biometric lock screen** — fingerprint / face ID on launch  
-- 🎂 **Birthday tracking** — store name, date, relationship, and notes  
-- 🔔 **Auto push notifications** — scheduled at 9 AM the day before and midnight on the day  
-- 📧 **Smart email reminders** — sent via EmailJS on the birthday and day before  
-- ☁️ **Firebase cloud sync** — birthdays backed up and synced across devices  
-- 📊 **Stats dashboard** — visual insights about your social circle  
-- 🤖 **AI chat assistant** — built-in Claude-powered birthday companion  
-=======
 - 🔒 **Biometric lock screen** — fingerprint / face ID on launch
 - 🎂 **Birthday tracking** — store name, date, relationship, and notes
 - 🔔 **Auto push notifications** — scheduled at 9 AM the day before and midnight on the day
@@ -96,7 +69,6 @@
 - ☁️ **Firebase cloud sync** — birthdays backed up and synced across devices
 - 📊 **Stats dashboard** — visual insights about your social circle
 - 🤖 **AI chat assistant** — built-in Claude-powered birthday companion
->>>>>>> Stashed changes
 
 <br/>
 
@@ -108,15 +80,6 @@
 
 ### 🔵 CORE
 
-<<<<<<< Updated upstream
-| Feature | Status | Description |
-|---|---|---|
-| Birthday CRUD | ✅ Live | Add, edit, delete birthdays with full details |
-| Biometric Auth | ✅ Live | Face ID / Fingerprint lock on app open |
-| Relationship Tags | ✅ Live | Tag each person (Friend, Family, Colleague…) |
-| Search & Filter | ✅ Live | Find any birthday instantly |
-| Upcoming View | ✅ Live | See who's next in line |
-=======
 | Feature           | Status  | Description                                   |
 | ----------------- | ------- | --------------------------------------------- |
 | Birthday CRUD     | ✅ Live | Add, edit, delete birthdays with full details |
@@ -124,45 +87,27 @@
 | Relationship Tags | ✅ Live | Tag each person (Friend, Family, Colleague…)  |
 | Search & Filter   | ✅ Live | Find any birthday instantly                   |
 | Upcoming View     | ✅ Live | See who's next in line                        |
->>>>>>> Stashed changes
 
 <br/>
 
 ### 🟣 NOTIFICATIONS & REMINDERS
 
-<<<<<<< Updated upstream
-| Feature | Status | Description |
-|---|---|---|
-| Push Notifications | ✅ Live | 9 AM day-before + midnight birthday alerts |
-| Email Reminders | ✅ Live | Auto-sent via EmailJS on trigger days |
-| GitHub Actions Cron | 🔜 Planned | Scheduled daily email — no app open needed |
-| Spam Prevention | ✅ Live | Once-per-day lock using AsyncStorage timestamps |
-=======
 | Feature             | Status     | Description                                     |
 | ------------------- | ---------- | ----------------------------------------------- |
 | Push Notifications  | ✅ Live    | 9 AM day-before + midnight birthday alerts      |
 | Email Reminders     | ✅ Live    | Auto-sent via EmailJS on trigger days           |
 | GitHub Actions Cron | 🔜 Planned | Scheduled daily email — no app open needed      |
 | Spam Prevention     | ✅ Live    | Once-per-day lock using AsyncStorage timestamps |
->>>>>>> Stashed changes
 
 <br/>
 
 ### 🟢 CLOUD & SYNC
 
-<<<<<<< Updated upstream
-| Feature | Status | Description |
-|---|---|---|
-| Firebase Firestore | ✅ Live | Real-time cloud backup |
-| Multi-device Sync | ✅ Live | Same data on all your devices |
-| Offline Support | ✅ Live | Works without internet, syncs on reconnect |
-=======
 | Feature            | Status  | Description                                |
 | ------------------ | ------- | ------------------------------------------ |
 | Firebase Firestore | ✅ Live | Real-time cloud backup                     |
 | Multi-device Sync  | ✅ Live | Same data on all your devices              |
 | Offline Support    | ✅ Live | Works without internet, syncs on reconnect |
->>>>>>> Stashed changes
 
 <br/>
 
@@ -172,11 +117,7 @@
 
 <br/>
 
-<<<<<<< Updated upstream
-> *Screenshots will go here once dev build is ready*
-=======
 > _Screenshots will go here once dev build is ready_
->>>>>>> Stashed changes
 
 ```
 ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
@@ -202,7 +143,7 @@
 ╔══════════════════════════════════════════════════════════════╗
 ║                        TECH STACK                            ║
 ╠══════════════════════════════════════════════════════════════╣
-║  FRONTEND          React Native + Expo SDK 54               ║
+║  FRONTEND          React Native + Expo SDK 57               ║
 ║  NAVIGATION        Expo Router (file-based)                  ║
 ║  FONTS             Orbitron 700 + Exo2 400/600              ║
 ║  ICONS             @expo/vector-icons (Ionicons)             ║
@@ -431,11 +372,7 @@ EMAILJS_PUBLIC_KEY
 name: Daily Birthday Emails
 on:
   schedule:
-<<<<<<< Updated upstream
-    - cron: '0 3 * * *'   # 9 AM IST = 3:30 AM UTC
-=======
     - cron: "0 3 * * *" # 9 AM IST = 3:30 AM UTC
->>>>>>> Stashed changes
   workflow_dispatch:
 
 jobs:
@@ -445,11 +382,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-<<<<<<< Updated upstream
-          node-version: '18'
-=======
           node-version: "18"
->>>>>>> Stashed changes
       - run: node scripts/sendBirthdayEmails.js
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
