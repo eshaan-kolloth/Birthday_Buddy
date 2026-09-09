@@ -1701,7 +1701,8 @@ export default function Index() {
             Authorization: `Bearer ${GROQ_API_KEY}`,
           },
           body: JSON.stringify({
-            model: "llama-3.3-70b-versatile",
+            model: "openai/gpt-oss-120b",
+            reasoning_effort: "low",
             messages: [
               { role: "system", content: buildSystemPrompt(freshBirthdays) },
               ...updatedHistory,
@@ -1713,6 +1714,9 @@ export default function Index() {
       );
 
       const data = await response.json();
+      if (data.error) {
+        console.error("Groq API error:", data.error);
+      }
       const rawReply =
         data.choices?.[0]?.message?.content || "Something went wrong 😅";
       let displayReply = rawReply;
