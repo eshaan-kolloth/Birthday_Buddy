@@ -156,8 +156,8 @@ npm test           # unit tests (Node's built-in runner)
 | **Early warning** | `npm start` prints a warning as soon as a newer SDK exists. | none |
 | **Automatic upgrade PR** | `.github/workflows/expo-sdk-watch.yml` checks weekly, runs `expo install --fix`, runs typecheck/lint/tests and opens a PR (a draft if something broke). Merging it is one click. | Enable _Settings → Actions → General → Allow GitHub Actions to create and approve pull requests_ |
 | **CI** | `.github/workflows/ci.yml` runs typecheck, lint and tests on every push/PR. | none |
-| **Automatic OTA updates** | `.github/workflows/eas-update.yml` publishes every green push to `main` with EAS Update. Installed builds download it in the background and apply it while the app is locked. | Add an `EXPO_TOKEN` repository secret ([create one](https://expo.dev/settings/access-tokens)) |
-| **Safe by construction** | `runtimeVersion` uses the `fingerprint` policy, so an update is only ever delivered to builds whose native code matches. An SDK upgrade can never be pushed to an old binary. | already configured |
+| **Always-latest copy on your phone** | `.github/workflows/eas-update.yml` publishes every green push to `main` to your Expo account. In Expo Go just open **Projects → BirthdayBuddy** (no PC, no QR). Installed builds download it in the background and apply it while the app is locked. | Add repository secrets: `EXPO_TOKEN` ([create one](https://expo.dev/settings/access-tokens)) plus your `EXPO_PUBLIC_*` values (see the workflow header) |
+| **Safe by construction** | `runtimeVersion` uses the `sdkVersion` policy: an update only reaches Expo Go / builds on the **same SDK**, so an SDK upgrade is never pushed to an older binary. (The stricter `fingerprint` policy is better once you ship real native builds.) | already configured |
 
 **Stop depending on Expo Go (the permanent fix).** A _development build_ is your own copy of the Expo Go shell, pinned to your project's SDK. It never auto-updates to a different SDK:
 

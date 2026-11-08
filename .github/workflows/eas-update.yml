@@ -1,13 +1,22 @@
 name: Publish OTA update
 
-# Every push to main (that passes the checks) is published over the air, so
-# installed builds of the app update themselves — no rebuild, no store review.
-# OTA can only ship JavaScript/assets. A new Expo SDK or native change needs a
-# new build; the "fingerprint" runtime version makes sure an update is only
-# ever delivered to builds that can run it.
+# Every push to main (that passes the checks) is published to your Expo account
+# as an EAS Update on the `main` branch. In Expo Go you then just open
+# Projects -> BirthdayBuddy and get the latest version: no PC, no QR code.
+# Installed development/preview/production builds can receive it too once
+# their channel is linked to the `main` branch (see the README).
 #
-# One-time setup: add an EXPO_TOKEN repository secret
-# (https://expo.dev/settings/access-tokens). Without it this workflow is a no-op.
+# OTA only ships JavaScript/assets. A new Expo SDK still needs a new build.
+#
+# One-time setup (GitHub: Settings -> Secrets and variables -> Actions):
+#   EXPO_TOKEN                        https://expo.dev/settings/access-tokens
+#   EXPO_PUBLIC_GROQ_API_KEY          the same values you keep in your local .env
+#   EXPO_PUBLIC_EMAILJS_SERVICE_ID
+#   EXPO_PUBLIC_EMAILJS_TEMPLATE_ID
+#   EXPO_PUBLIC_EMAILJS_PUBLIC_KEY
+#   EXPO_PUBLIC_FIREBASE_PROJECT_ID   (optional, has a built-in default)
+# The .env file is git-ignored, so without these secrets the published app would
+# have no chat key and no email settings. Without EXPO_TOKEN this is a no-op.
 
 on:
   push:
@@ -63,6 +72,10 @@ jobs:
 
       - name: Publish update
         if: env.EXPO_TOKEN != ''
-        run: |
-          eas update --channel production --message "${UPDATE_MESSAGE:-OTA update}" --non-interactive
-          eas update --channel preview --message "${UPDATE_MESSAGE:-OTA update}" --non-interactive
+        env:
+          EXPO_PUBLIC_GROQ_API_KEY: ${{ secrets.EXPO_PUBLIC_GROQ_API_KEY }}
+          EXPO_PUBLIC_EMAILJS_SERVICE_ID: ${{ secrets.EXPO_PUBLIC_EMAILJS_SERVICE_ID }}
+          EXPO_PUBLIC_EMAILJS_TEMPLATE_ID: ${{ secrets.EXPO_PUBLIC_EMAILJS_TEMPLATE_ID }}
+          EXPO_PUBLIC_EMAILJS_PUBLIC_KEY: ${{ secrets.EXPO_PUBLIC_EMAILJS_PUBLIC_KEY }}
+          EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_PROJECT_ID }}
+        run: eas update --branch main --message "${UPDATE_MESSAGE:-OTA update}" --non-interactive
