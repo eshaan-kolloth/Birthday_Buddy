@@ -1,49 +1,18 @@
 import { useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { Animated, Easing, ScrollView, Text, View } from "react-native";
 import { COLORS } from "../constants/theme";
+import {
+  MONTHS_FULL,
+  MONTHS_SHORT as MONTHS_SHORT_TITLE,
+  countdown,
+  daysUntil as getDaysUntil,
+  isToday,
+} from "../utils/dates";
 import { Birthday, loadBirthdays } from "../utils/storage";
+import { useAnimations } from "../utils/animation";
 
-const MONTHS_SHORT = [
-  "JAN",
-  "FEB",
-  "MAR",
-  "APR",
-  "MAY",
-  "JUN",
-  "JUL",
-  "AUG",
-  "SEP",
-  "OCT",
-  "NOV",
-  "DEC",
-];
-const MONTHS_FULL = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
-const getDaysUntil = (month: number, day: number) => {
-  const now = new Date();
-  const next = new Date(now.getFullYear(), month - 1, day);
-  if (next <= now) next.setFullYear(now.getFullYear() + 1);
-  return Math.ceil((next.getTime() - now.getTime()) / 86400000);
-};
-
-const isToday = (month: number, day: number) => {
-  const t = new Date();
-  return month === t.getMonth() + 1 && day === t.getDate();
-};
+const MONTHS_SHORT = MONTHS_SHORT_TITLE.map((m) => m.toUpperCase());
 
 const groupByDate = (birthdays: Birthday[]) => {
   const groups: Record<string, Birthday[]> = {};
@@ -80,12 +49,12 @@ const SectionHeader = ({
   color: string;
   icon: string;
 }) => {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(-20)).current;
-  const glowAnim = useRef(new Animated.Value(0.3)).current;
+  const [fadeAnim] = useState(() => new Animated.Value(0));
+  const [slideAnim] = useState(() => new Animated.Value(-20));
+  const [glowAnim] = useState(() => new Animated.Value(0.3));
 
-  useEffect(() => {
-    Animated.parallel([
+  useAnimations((run) => {
+    run(Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 700,
@@ -98,8 +67,8 @@ const SectionHeader = ({
         easing: Easing.out(Easing.ease),
         useNativeDriver: true,
       }),
-    ]).start();
-    Animated.loop(
+    ]));
+    run(Animated.loop(
       Animated.sequence([
         Animated.timing(glowAnim, {
           toValue: 1,
@@ -114,7 +83,7 @@ const SectionHeader = ({
           useNativeDriver: true,
         }),
       ]),
-    ).start();
+    ));
   }, []);
 
   return (
@@ -193,12 +162,12 @@ const StatCard = ({
   color: string;
   delay?: number;
 }) => {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(20)).current;
-  const glowAnim = useRef(new Animated.Value(0.4)).current;
+  const [fadeAnim] = useState(() => new Animated.Value(0));
+  const [slideAnim] = useState(() => new Animated.Value(20));
+  const [glowAnim] = useState(() => new Animated.Value(0.4));
 
-  useEffect(() => {
-    Animated.parallel([
+  useAnimations((run) => {
+    run(Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 600,
@@ -213,8 +182,8 @@ const StatCard = ({
         easing: Easing.out(Easing.ease),
         useNativeDriver: true,
       }),
-    ]).start();
-    Animated.loop(
+    ]));
+    run(Animated.loop(
       Animated.sequence([
         Animated.timing(glowAnim, {
           toValue: 1,
@@ -229,7 +198,7 @@ const StatCard = ({
           useNativeDriver: true,
         }),
       ]),
-    ).start();
+    ));
   }, []);
 
   return (
@@ -270,7 +239,7 @@ const StatCard = ({
         style={{
           color: COLORS.textSecondary,
           fontFamily: "Exo2_400Regular",
-          fontSize: 9,
+          fontSize: 10,
           marginTop: 4,
           textAlign: "center",
           letterSpacing: 1.5,
@@ -288,14 +257,14 @@ const NextBirthdayBanner = ({
 }: {
   groups: ReturnType<typeof getUpcomingGroups>;
 }) => {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(20)).current;
-  const glowAnim = useRef(new Animated.Value(0.3)).current;
-  const blinkAnim = useRef(new Animated.Value(1)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const [fadeAnim] = useState(() => new Animated.Value(0));
+  const [slideAnim] = useState(() => new Animated.Value(20));
+  const [glowAnim] = useState(() => new Animated.Value(0.3));
+  const [blinkAnim] = useState(() => new Animated.Value(1));
+  const [pulseAnim] = useState(() => new Animated.Value(1));
 
-  useEffect(() => {
-    Animated.parallel([
+  useAnimations((run) => {
+    run(Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 800,
@@ -308,9 +277,9 @@ const NextBirthdayBanner = ({
         easing: Easing.out(Easing.ease),
         useNativeDriver: true,
       }),
-    ]).start();
+    ]));
 
-    Animated.loop(
+    run(Animated.loop(
       Animated.sequence([
         Animated.timing(glowAnim, {
           toValue: 1,
@@ -325,9 +294,9 @@ const NextBirthdayBanner = ({
           useNativeDriver: true,
         }),
       ]),
-    ).start();
+    ));
 
-    Animated.loop(
+    run(Animated.loop(
       Animated.sequence([
         Animated.timing(blinkAnim, {
           toValue: 0.3,
@@ -340,9 +309,9 @@ const NextBirthdayBanner = ({
           useNativeDriver: true,
         }),
       ]),
-    ).start();
+    ));
 
-    Animated.loop(
+    run(Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
           toValue: 1.02,
@@ -357,7 +326,7 @@ const NextBirthdayBanner = ({
           useNativeDriver: true,
         }),
       ]),
-    ).start();
+    ));
   }, []);
 
   if (!groups[0]) {
@@ -390,8 +359,7 @@ const NextBirthdayBanner = ({
 
   const { people, daysUntil, month, day } = groups[0];
   const todayB = isToday(month, day);
-  const months = Math.floor(daysUntil / 30);
-  const days = daysUntil % 30;
+  const { months, days } = countdown(month, day);
   const isGroup = people.length > 1;
 
   // ── EXACT replica of your old banner — hot pink + orange + cyan ──
@@ -470,7 +438,7 @@ const NextBirthdayBanner = ({
                 style={{
                   color: "#ff0080",
                   fontFamily: "Orbitron_700Bold",
-                  fontSize: 9,
+                  fontSize: 10,
                   letterSpacing: 2,
                 }}
               >
@@ -493,7 +461,7 @@ const NextBirthdayBanner = ({
                 style={{
                   color: todayB ? "#ffcc00" : "#ff6600",
                   fontFamily: "Orbitron_700Bold",
-                  fontSize: 9,
+                  fontSize: 10,
                   letterSpacing: 2,
                 }}
               >
@@ -592,7 +560,7 @@ const NextBirthdayBanner = ({
                   style={{
                     color: "#ff6600",
                     fontFamily: "Orbitron_700Bold",
-                    fontSize: 7,
+                    fontSize: 10,
                     letterSpacing: 2,
                     marginTop: 4,
                   }}
@@ -631,7 +599,7 @@ const NextBirthdayBanner = ({
             style={{
               color: COLORS.textMuted,
               fontFamily: "Exo2_400Regular",
-              fontSize: 9,
+              fontSize: 10,
               letterSpacing: 2,
               marginTop: 8,
               textAlign: "center",
@@ -650,11 +618,11 @@ const ThisMonthSpotlight = ({ birthdays }: { birthdays: Birthday[] }) => {
   const now = new Date();
   const thisMonth = now.getMonth() + 1;
   const thisMonthB = birthdays.filter((b) => b.month === thisMonth);
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(20)).current;
+  const [fadeAnim] = useState(() => new Animated.Value(0));
+  const [slideAnim] = useState(() => new Animated.Value(20));
 
-  useEffect(() => {
-    Animated.parallel([
+  useAnimations((run) => {
+    run(Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 700,
@@ -665,7 +633,7 @@ const ThisMonthSpotlight = ({ birthdays }: { birthdays: Birthday[] }) => {
         duration: 700,
         useNativeDriver: true,
       }),
-    ]).start();
+    ]));
   }, []);
 
   const groups = groupByDate(thisMonthB);
@@ -729,7 +697,7 @@ const ThisMonthSpotlight = ({ birthdays }: { birthdays: Birthday[] }) => {
                 style={{
                   color: COLORS.purple,
                   fontFamily: "Orbitron_700Bold",
-                  fontSize: 9,
+                  fontSize: 10,
                 }}
               >
                 {thisMonthB.length} BIRTHDAYS
@@ -780,7 +748,7 @@ const ThisMonthSpotlight = ({ birthdays }: { birthdays: Birthday[] }) => {
                         style={{
                           color: "#ffcc00",
                           fontFamily: "Orbitron_700Bold",
-                          fontSize: 8,
+                          fontSize: 10,
                           letterSpacing: 1,
                         }}
                       >
@@ -854,7 +822,7 @@ const ThisMonthSpotlight = ({ birthdays }: { birthdays: Birthday[] }) => {
                         style={{
                           color: today ? "#ffcc00" : COLORS.purple,
                           fontFamily: "Orbitron_700Bold",
-                          fontSize: 7,
+                          fontSize: 10,
                           letterSpacing: 1,
                         }}
                       >
@@ -880,7 +848,7 @@ const QuickFacts = ({
   birthdays: Birthday[];
   groups: ReturnType<typeof getUpcomingGroups>;
 }) => {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [fadeAnim] = useState(() => new Animated.Value(0));
   const now = new Date();
   const thisMonth = now.getMonth() + 1;
 
@@ -907,12 +875,12 @@ const QuickFacts = ({
       ? todayBirthdays.map((b) => b.name).join("\n")
       : "No birthdays today";
 
-  useEffect(() => {
-    Animated.timing(fadeAnim, {
+  useAnimations((run) => {
+    run(Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 700,
       useNativeDriver: true,
-    }).start();
+    }));
   }, []);
 
   return (
@@ -961,7 +929,7 @@ const QuickFacts = ({
               style={{
                 color: COLORS.textMuted,
                 fontFamily: "Exo2_400Regular",
-                fontSize: 9,
+                fontSize: 10,
                 letterSpacing: 1.5,
                 marginBottom: 2,
               }}
@@ -997,7 +965,7 @@ const QuickFacts = ({
                 style={{
                   color: "#ff0080",
                   fontFamily: "Orbitron_700Bold",
-                  fontSize: 9,
+                  fontSize: 10,
                 }}
               >
                 IN {nextUpDays}D
@@ -1118,7 +1086,7 @@ const QuickFacts = ({
               style={{
                 color: COLORS.textMuted,
                 fontFamily: "Exo2_400Regular",
-                fontSize: 9,
+                fontSize: 10,
                 letterSpacing: 1.5,
                 marginBottom: 2,
               }}
@@ -1158,15 +1126,15 @@ const RelationshipBar = ({
   delay: number;
   emoji: string;
 }) => {
-  const barAnim = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    Animated.timing(barAnim, {
+  const [barAnim] = useState(() => new Animated.Value(0));
+  useAnimations((run) => {
+    run(Animated.timing(barAnim, {
       toValue: pct,
       duration: 900,
       delay,
       easing: Easing.out(Easing.ease),
       useNativeDriver: false,
-    }).start();
+    }));
   }, [pct]);
 
   return (
@@ -1223,7 +1191,7 @@ const RelationshipBar = ({
 
 // ── Relationship Breakdown ─────────────────────────────────
 const RelationshipBreakdown = ({ birthdays }: { birthdays: Birthday[] }) => {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [fadeAnim] = useState(() => new Animated.Value(0));
   const groups: Record<string, number> = {};
   birthdays.forEach((b) => {
     const key = b.relationship ? b.relationship.toLowerCase() : "other";
@@ -1256,12 +1224,12 @@ const RelationshipBreakdown = ({ birthdays }: { birthdays: Birthday[] }) => {
     other: "⭐",
   };
 
-  useEffect(() => {
-    Animated.timing(fadeAnim, {
+  useAnimations((run) => {
+    run(Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 800,
       useNativeDriver: true,
-    }).start();
+    }));
   }, []);
 
   if (birthdays.length === 0) return null;
@@ -1300,12 +1268,12 @@ const BarChart = ({ birthdays }: { birthdays: Birthday[] }) => {
     (_, i) => birthdays.filter((b) => b.month === i + 1).length,
   );
   const maxCount = Math.max(...monthCounts, 1);
-  const animValues = useRef(
+  const [animValues] = useState(() =>
     MONTHS_SHORT.map(() => new Animated.Value(0)),
-  ).current;
+  );
 
-  useEffect(() => {
-    Animated.parallel(
+  useAnimations((run) => {
+    run(Animated.parallel(
       monthCounts.map((count, index) =>
         Animated.timing(animValues[index], {
           toValue: count / maxCount,
@@ -1315,8 +1283,8 @@ const BarChart = ({ birthdays }: { birthdays: Birthday[] }) => {
           useNativeDriver: false,
         }),
       ),
-    ).start();
-  }, [birthdays.length]);
+    ));
+  }, [monthCounts.join(",")]);
 
   return (
     <View
@@ -1346,7 +1314,7 @@ const BarChart = ({ birthdays }: { birthdays: Birthday[] }) => {
             <Text
               style={{
                 color: count > 0 ? COLORS.cyan : "transparent",
-                fontSize: 7,
+                fontSize: 10,
                 fontFamily: "Orbitron_700Bold",
                 marginBottom: 2,
               }}
@@ -1372,7 +1340,7 @@ const BarChart = ({ birthdays }: { birthdays: Birthday[] }) => {
             <Text
               style={{
                 color: COLORS.textMuted,
-                fontSize: 6,
+                fontSize: 10,
                 fontFamily: "Exo2_400Regular",
                 marginTop: 4,
               }}
@@ -1524,7 +1492,7 @@ export default function StatsScreen() {
                 lineHeight: 20,
               }}
             >
-              Add birthdays from the Chat tab{"\n"}and they'll appear here! 😊
+              Add birthdays from the Chat tab{"\n"}and they&apos;ll appear here! 😊
             </Text>
           </View>
         )}

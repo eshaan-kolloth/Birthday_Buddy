@@ -1,0 +1,84 @@
+name: Expo SDK watch
+
+# Expo Go on iOS is always the *latest* SDK, so every new Expo release breaks
+# "scan the QR code in Expo Go" for a project that has not upgraded yet. This
+# workflow notices a new SDK within a week and opens a pull request with the
+# upgrade already applied and tested, so keeping up is a single click.
+#
+# Needs: Settings → Actions → General → "Allow GitHub Actions to create and
+# approve pull requests".
+
+on:
+  schedule:
+    - cron: "0 4 * * 1" # Mondays, 04:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Compare project SDK with the latest release
+        id: sdk
+        run: |
+          current=$(node -p "String(require('./package.json').dependencies.expo).replace(/[^0-9.]/g, '').split('.')[0]")
+          latest=$(npm view expo@latest version)
+          latest_major=${latest%%.*}
+          echo "Project SDK: $current — latest SDK: $latest_major ($latest)"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "latest=$latest_major" >> "$GITHUB_OUTPUT"
+          if [ "$latest_major" -gt "$current" ]; then
+            echo "upgrade=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open an upgrade pull request
+        if: steps.sdk.outputs.upgrade == 'true'
+        env:
+          LATEST: ${{ steps.sdk.outputs.latest }}
+          CURRENT: ${{ steps.sdk.outputs.current }}
+        run: |
+          branch="chore/expo-sdk-$LATEST"
+          if git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
+            echo "Branch $branch already exists — an upgrade PR is already open."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+
+          npm install "expo@^$LATEST.0.0" --no-audit --no-fund
+          npx expo install --fix
+
+          status="✅ typecheck, lint and tests pass"
+          draft=""
+          if ! (npm run typecheck && npm run lint && npm test); then
+            status="⚠️ typecheck, lint or tests FAIL after the upgrade — see the SDK $LATEST upgrade guide and fix before merging"
+            draft="--draft"
+          fi
+
+          git add -A
+          git commit -m "chore: upgrade Expo SDK $CURRENT to $LATEST"
+          git push origin "$branch"
+
+          gh pr create $draft \
+            --title "Upgrade Expo SDK $CURRENT → $LATEST" \
+            --body "Automated upgrade so the project matches the latest Expo Go (iOS only opens the newest SDK).
+
+          $status
+
+          After merging: build a new native binary if you use dev/preview/production builds (\`eas build\`). OTA updates cannot change the SDK."

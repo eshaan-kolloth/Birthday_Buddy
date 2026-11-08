@@ -25,7 +25,8 @@ export const COLORS = {
 
   textPrimary: "#ccccdd",
   textSecondary: "#8888aa",
-  textMuted: "#555566",
+  // Lightened from #555566 so small labels reach ~4.5:1 contrast on the dark background.
+  textMuted: "#7b7b94",
   textBright: "#ffffff",
 
   borderCyan: "#00e5ff",
@@ -36,3 +37,19 @@ export const COLORS = {
   shadowCyan: "#00e5ff40",
   shadowPurple: "#b44fff40",
 };
+
+/** One accent colour per calendar month. */
+export const MONTH_COLORS = [
+  "#00E5FF",
+  "#A855F7",
+  "#22C55E",
+  "#FFB703",
+  "#FF4D8D",
+  "#38BDF8",
+  "#F97316",
+  "#14F195",
+  "#E879F9",
+  "#F43F5E",
+  "#60A5FA",
+  "#FACC15",
+];

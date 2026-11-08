@@ -1,0 +1,68 @@
+name: Publish OTA update
+
+# Every push to main (that passes the checks) is published over the air, so
+# installed builds of the app update themselves — no rebuild, no store review.
+# OTA can only ship JavaScript/assets. A new Expo SDK or native change needs a
+# new build; the "fingerprint" runtime version makes sure an update is only
+# ever delivered to builds that can run it.
+#
+# One-time setup: add an EXPO_TOKEN repository secret
+# (https://expo.dev/settings/access-tokens). Without it this workflow is a no-op.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "scripts/**"
+      - ".github/workflows/birthday-emails.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eas-update
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      UPDATE_MESSAGE: ${{ github.event.head_commit.message }}
+
+    steps:
+      - name: EXPO_TOKEN missing
+        if: env.EXPO_TOKEN == ''
+        run: echo "::notice::Add an EXPO_TOKEN repository secret to enable automatic OTA updates."
+
+      - uses: actions/checkout@v4
+        if: env.EXPO_TOKEN != ''
+
+      - uses: actions/setup-node@v4
+        if: env.EXPO_TOKEN != ''
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install and verify
+        if: env.EXPO_TOKEN != ''
+        run: |
+          npm ci
+          npm run typecheck
+          npm run lint
+          npm test
+
+      - uses: expo/expo-github-action@v8
+        if: env.EXPO_TOKEN != ''
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Publish update
+        if: env.EXPO_TOKEN != ''
+        run: |
+          eas update --channel production --message "${UPDATE_MESSAGE:-OTA update}" --non-interactive
+          eas update --channel preview --message "${UPDATE_MESSAGE:-OTA update}" --non-interactive

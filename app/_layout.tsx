@@ -3,42 +3,64 @@ import { Orbitron_700Bold } from "@expo-google-fonts/orbitron";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { Tabs } from "expo-router";
-import { useState } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, AppState, View } from "react-native";
+import LockScreen from "../components/LockScreen";
+import { RELOCK_AFTER_MS } from "../constants/config";
 import { COLORS } from "../constants/theme";
+import { useAutoUpdate } from "../utils/appUpdates";
 import {
-  checkAndSendBirthdayEmails,
-  scheduleAllBirthdayNotifications,
-} from "../utils/notifications";
-import { loadBirthdays } from "../utils/storage";
-import LockScreen from "./LockScreen";
+  bootstrapBirthdays,
+  runPostUnlockTasks,
+} from "../utils/birthdayService";
+
+// React Navigation may hand back a non-string colour; icons need a plain string.
+const tint = (color: unknown) =>
+  typeof color === "string" ? color : COLORS.cyan;
+
+// A slow network must never be able to hang the unlock.
+const BOOTSTRAP_TIMEOUT_MS = 5000;
 
 export default function Layout() {
   const [isUnlocked, setIsUnlocked] = useState(false);
+  const backgroundedAt = useRef<number | null>(null);
 
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Orbitron_700Bold,
     Exo2_400Regular,
     Exo2_600SemiBold,
   });
 
-  const handleUnlock = async () => {
-    setIsUnlocked(true);
-    try {
-      const birthdays = await loadBirthdays();
-      if (birthdays.length > 0) {
-        // Schedule push notifications
-        await scheduleAllBirthdayNotifications(birthdays);
+  // Downloads over-the-air updates and applies them while the lock screen is up.
+  useAutoUpdate(!isUnlocked);
 
-        // Check if any birthdays are today or tomorrow and send emails
-        await checkAndSendBirthdayEmails(birthdays);
+  // Lock again after the app has been in the background for a while.
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "background") {
+        backgroundedAt.current = Date.now();
+      } else if (state === "active" && backgroundedAt.current !== null) {
+        if (Date.now() - backgroundedAt.current > RELOCK_AFTER_MS) {
+          setIsUnlocked(false);
+        }
+        backgroundedAt.current = null;
       }
-    } catch (e) {
-      console.error("Failed on unlock:", e);
-    }
+    });
+    return () => subscription.remove();
+  }, []);
+
+  const handleUnlock = async () => {
+    // A fresh install restores from the cloud before the screens load.
+    await Promise.race([
+      bootstrapBirthdays(),
+      new Promise((resolve) => setTimeout(resolve, BOOTSTRAP_TIMEOUT_MS)),
+    ]);
+    setIsUnlocked(true);
+    void runPostUnlockTasks();
   };
 
-  if (!fontsLoaded) {
+  // Don't spin forever if a font fails to load; fall back to system fonts.
+  if (!fontsLoaded && !fontError) {
     return (
       <View
         style={{
@@ -82,7 +104,7 @@ export default function Layout() {
           title: "BIRTHDAY BUDDY",
           tabBarLabel: "Chat",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="chatbubble-ellipses" size={24} color={color} />
+            <Ionicons name="chatbubble-ellipses" size={24} color={tint(color)} />
           ),
         }}
       />
@@ -92,7 +114,7 @@ export default function Layout() {
           title: "BIRTHDAYS",
           tabBarLabel: "Birthdays",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="calendar" size={24} color={color} />
+            <Ionicons name="calendar" size={24} color={tint(color)} />
           ),
         }}
       />
@@ -102,11 +124,10 @@ export default function Layout() {
           title: "STATS",
           tabBarLabel: "Stats",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="bar-chart" size={24} color={color} />
+            <Ionicons name="bar-chart" size={24} color={tint(color)} />
           ),
         }}
       />
-      <Tabs.Screen name="LockScreen" options={{ href: null }} />
     </Tabs>
   );
 }

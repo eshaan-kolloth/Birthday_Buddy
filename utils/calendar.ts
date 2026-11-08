@@ -1,9 +1,19 @@
-import * as Calendar from "expo-calendar";
+// SDK 58 moved the function-based API to `expo-calendar/legacy` and made the root
+// import an object-oriented API (the old names remain at the root only as
+// deprecated wrappers that are due to be removed). Importing the legacy entry
+// point explicitly keeps this stable.
+import * as Calendar from "expo-calendar/legacy";
 import { Platform } from "react-native";
+import { observedDate } from "./dates";
 import { Birthday } from "./storage";
 
-async function getBirthdayBuddyCalendarId() {
-  const { status } = await Calendar.requestCalendarPermissionsAsync();
+const CALENDAR_TITLE = "BirthdayBuddy";
+
+async function resolveCalendarId(): Promise<string | null> {
+  let { status } = await Calendar.getCalendarPermissionsAsync();
+  if (status !== "granted") {
+    ({ status } = await Calendar.requestCalendarPermissionsAsync());
+  }
   if (status !== "granted") {
     console.log("Calendar permission denied");
     return null;
@@ -13,8 +23,8 @@ async function getBirthdayBuddyCalendarId() {
     Calendar.EntityTypes.EVENT,
   );
 
-  let birthdayCalendar = calendars.find((c) => c.title === "BirthdayBuddy");
-  if (birthdayCalendar) return birthdayCalendar.id;
+  const existing = calendars.find((c) => c.title === CALENDAR_TITLE);
+  if (existing) return existing.id;
 
   const defaultCalendar =
     Platform.OS === "ios"
@@ -23,23 +33,46 @@ async function getBirthdayBuddyCalendarId() {
 
   if (!defaultCalendar) return null;
 
-  const newCalendarId = await Calendar.createCalendarAsync({
-    title: "BirthdayBuddy",
+  return Calendar.createCalendarAsync({
+    title: CALENDAR_TITLE,
     color: "#00E5FF",
     entityType: Calendar.EntityTypes.EVENT,
     sourceId: defaultCalendar.source?.id,
     source: defaultCalendar.source,
-    name: "BirthdayBuddy",
+    name: CALENDAR_TITLE,
     ownerAccount: "personal",
     accessLevel: Calendar.CalendarAccessLevel.OWNER,
   });
-
-  return newCalendarId;
 }
+
+// One in-flight lookup is shared, so two quick calls can never each decide the
+// calendar is missing and create it twice.
+let calendarIdPromise: Promise<string | null> | null = null;
+function getBirthdayBuddyCalendarId(): Promise<string | null> {
+  if (!calendarIdPromise) {
+    calendarIdPromise = resolveCalendarId().then(
+      (id) => {
+        if (!id) calendarIdPromise = null; // permission denied: ask again next time
+        return id;
+      },
+      (e) => {
+        calendarIdPromise = null;
+        throw e;
+      },
+    );
+  }
+  return calendarIdPromise;
+}
+
+const titleFor = (birthday: Birthday) =>
+  birthday.relationship
+    ? `🎂 ${birthday.name}'s Birthday (${birthday.relationship})`
+    : `🎂 ${birthday.name}'s Birthday`;
 
 export const addBirthdayToCalendar = async (
   birthday: Birthday,
 ): Promise<string | null> => {
+  if (Platform.OS === "web") return null;
   try {
     const calendarId = await getBirthdayBuddyCalendarId();
     if (!calendarId) return null;
@@ -48,25 +81,20 @@ export const addBirthdayToCalendar = async (
     await removeBirthdayFromCalendar(birthday);
 
     const now = new Date();
-    const year = now.getFullYear();
-    const eventDate = new Date(year, birthday.month - 1, birthday.day);
-
-    // Compare dates only, not time
     const todayMidnight = new Date(
       now.getFullYear(),
       now.getMonth(),
       now.getDate(),
     );
+    // Feb 29 repeats yearly on Feb 28 so it still appears in non-leap years.
+    const { month, day } = observedDate(birthday.month, birthday.day, 2023);
+    let eventDate = new Date(now.getFullYear(), month - 1, day);
     if (eventDate < todayMidnight) {
-      eventDate.setFullYear(year + 1);
+      eventDate = new Date(now.getFullYear() + 1, month - 1, day);
     }
 
-    const title = birthday.relationship
-      ? `🎂 ${birthday.name}'s Birthday (${birthday.relationship})`
-      : `🎂 ${birthday.name}'s Birthday`;
-
     const eventId = await Calendar.createEventAsync(calendarId, {
-      title,
+      title: titleFor(birthday),
       startDate: eventDate,
       endDate: eventDate,
       allDay: true,
@@ -88,6 +116,7 @@ export const addBirthdayToCalendar = async (
 export const removeBirthdayFromCalendar = async (
   birthday: Birthday,
 ): Promise<void> => {
+  if (Platform.OS === "web") return;
   try {
     const calendarId = await getBirthdayBuddyCalendarId();
     if (!calendarId) return;
@@ -105,17 +134,15 @@ export const removeBirthdayFromCalendar = async (
       }
     }
 
-    // Fallback: search by exact title in BirthdayBuddy calendar only
+    // Fallback: search the dedicated BirthdayBuddy calendar by title. The
+    // prefix match also finds events saved with an older relationship label.
     const now = new Date();
     const future = new Date(now.getFullYear() + 3, 11, 31);
-
     const events = await Calendar.getEventsAsync([calendarId], now, future);
 
-    const expectedTitle1 = `🎂 ${birthday.name}'s Birthday`;
-    const expectedTitle2 = `🎂 ${birthday.name}'s Birthday (${birthday.relationship})`;
-
+    const prefix = `🎂 ${birthday.name}'s Birthday`;
     const matches = events.filter(
-      (e) => e.title === expectedTitle1 || e.title === expectedTitle2,
+      (e) => e.title === prefix || e.title.startsWith(`${prefix} (`),
     );
 
     console.log(

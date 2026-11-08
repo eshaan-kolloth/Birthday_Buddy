@@ -21,13 +21,13 @@
 <br/>
 
 ![Platform](https://img.shields.io/badge/Platform-React%20Native-00E5FF?style=for-the-badge&logoColor=white&labelColor=050508)
-![Framework](https://img.shields.io/badge/Framework-Expo%20SDK%2057-B44FFF?style=for-the-badge&logoColor=white&labelColor=050508)
+![Framework](https://img.shields.io/badge/Framework-Expo%20SDK%2058-B44FFF?style=for-the-badge&logoColor=white&labelColor=050508)
 ![Database](https://img.shields.io/badge/Cloud-Firebase-00E5FF?style=for-the-badge&logoColor=white&labelColor=050508)
 ![License](https://img.shields.io/badge/License-MIT-00FF88?style=for-the-badge&logoColor=white&labelColor=050508)
 
 <br/>
 
-> _"A cyberpunk-themed birthday tracker that auto-schedules notifications, sends email reminders, and syncs to the cloud — all without you lifting a finger."_
+> _"A cyberpunk-themed birthday tracker that schedules reminders, emails you before the big day, and backs up to the cloud."_
 
 <br/>
 
@@ -42,15 +42,15 @@
 ```
 01 ─── Overview
 02 ─── Features
-03 ─── Screenshots
-04 ─── Tech Stack
-05 ─── Getting Started
+03 ─── Tech Stack
+04 ─── Getting Started
+05 ─── Keeping up with Expo SDK releases
 06 ─── Project Structure
 07 ─── How It Works
 08 ─── Automation: GitHub Actions
 09 ─── Environment Variables
-10 ─── Roadmap
-11 ─── Contributing
+10 ─── Security notes
+11 ─── Roadmap
 12 ─── License
 ```
 
@@ -60,15 +60,15 @@
 
 ## `01` ── OVERVIEW
 
-**BirthdayBuddy** is a mobile app built with React Native + Expo that makes sure you never miss a birthday. Behind the slick neon interface lives a powerful system:
+**BirthdayBuddy** is a mobile app built with React Native + Expo that makes sure you never miss a birthday.
 
-- 🔒 **Biometric lock screen** — fingerprint / face ID on launch
-- 🎂 **Birthday tracking** — store name, date, relationship, and notes
-- 🔔 **Auto push notifications** — scheduled at 9 AM the day before and midnight on the day
-- 📧 **Smart email reminders** — sent via EmailJS on the birthday and day before
-- ☁️ **Firebase cloud sync** — birthdays backed up and synced across devices
-- 📊 **Stats dashboard** — visual insights about your social circle
-- 🤖 **AI chat assistant** — built-in Claude-powered birthday companion
+- 🔒 **Lock screen** — Face ID / fingerprint / device passcode on launch, and again after the app has been in the background for 30 seconds
+- 🎂 **Birthday tracking** — name, date, relationship and notes; add, edit and delete
+- 🔔 **Reminders** — a notification at 9 AM the day before and at midnight on the day, repeating **every year** even if you never reopen the app
+- 📧 **Email reminders** — sent through EmailJS, by the app and by a daily GitHub Action (never twice for the same birthday)
+- ☁️ **Cloud backup** — every change is queued and retried until it reaches Firestore; reinstalling restores your list
+- 📊 **Stats** and a **calendar** view
+- 🤖 **Chat assistant** — an AI chat (Groq) that can add, update and delete birthdays for you (deletes ask for confirmation)
 
 <br/>
 
@@ -76,84 +76,35 @@
 
 ## `02` ── FEATURES
 
-<br/>
-
-### 🔵 CORE
-
-| Feature           | Status  | Description                                   |
-| ----------------- | ------- | --------------------------------------------- |
-| Birthday CRUD     | ✅ Live | Add, edit, delete birthdays with full details |
-| Biometric Auth    | ✅ Live | Face ID / Fingerprint lock on app open        |
-| Relationship Tags | ✅ Live | Tag each person (Friend, Family, Colleague…)  |
-| Search & Filter   | ✅ Live | Find any birthday instantly                   |
-| Upcoming View     | ✅ Live | See who's next in line                        |
-
-<br/>
-
-### 🟣 NOTIFICATIONS & REMINDERS
-
-| Feature             | Status     | Description                                     |
-| ------------------- | ---------- | ----------------------------------------------- |
-| Push Notifications  | ✅ Live    | 9 AM day-before + midnight birthday alerts      |
-| Email Reminders     | ✅ Live    | Auto-sent via EmailJS on trigger days           |
-| GitHub Actions Cron | 🔜 Planned | Scheduled daily email — no app open needed      |
-| Spam Prevention     | ✅ Live    | Once-per-day lock using AsyncStorage timestamps |
-
-<br/>
-
-### 🟢 CLOUD & SYNC
-
-| Feature            | Status  | Description                                |
-| ------------------ | ------- | ------------------------------------------ |
-| Firebase Firestore | ✅ Live | Real-time cloud backup                     |
-| Multi-device Sync  | ✅ Live | Same data on all your devices              |
-| Offline Support    | ✅ Live | Works without internet, syncs on reconnect |
+| Feature | Details |
+| --- | --- |
+| Add / edit / delete | Edit covers name, date, relationship and notes. Deletes always ask first. |
+| Search | Filter the Birthdays tab by name or relationship. |
+| Calendar sync | Each birthday is mirrored into a "BirthdayBuddy" calendar on the device (not available on web). |
+| Notifications | Grouped by date, yearly repeating. Feb 29 birthdays are observed on Feb 28 in non-leap years. |
+| Emails | Day-before and day-of. A shared marker in Firestore stops the app and the GitHub Action from both sending. |
+| Cloud backup | Offline-safe write queue + a daily reconcile. See _How it works_ for the limits (it is a backup, not live multi-device sync). |
+| Automatic updates | Installed builds update themselves over the air — see [section 05](#05--keeping-up-with-expo-sdk-releases). |
 
 <br/>
 
 ---
 
-## `03` ── SCREENSHOTS
-
-<br/>
-
-> _Screenshots will go here once dev build is ready_
-
-```
-┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
-│                  │  │                  │  │                  │
-│   LOCK SCREEN    │  │  BIRTHDAYS LIST  │  │  STATS SCREEN    │
-│                  │  │                  │  │                  │
-│  ◈ Biometric     │  │  ◈ Card Grid     │  │  ◈ Charts        │
-│  ◈ Neon UI       │  │  ◈ Countdown     │  │  ◈ Insights      │
-│  ◈ Animated      │  │  ◈ Filters       │  │  ◈ Animated      │
-│                  │  │                  │  │                  │
-└──────────────────┘  └──────────────────┘  └──────────────────┘
-```
-
-<br/>
-
----
-
-## `04` ── TECH STACK
-
-<br/>
+## `03` ── TECH STACK
 
 ```
 ╔══════════════════════════════════════════════════════════════╗
-║                        TECH STACK                            ║
-╠══════════════════════════════════════════════════════════════╣
-║  FRONTEND          React Native + Expo SDK 57               ║
+║  FRONTEND          React Native + Expo SDK 58                ║
 ║  NAVIGATION        Expo Router (file-based)                  ║
-║  FONTS             Orbitron 700 + Exo2 400/600              ║
-║  ICONS             @expo/vector-icons (Ionicons)             ║
+║  FONTS             Orbitron 700 + Exo2 400/600               ║
 ║  ANIMATIONS        React Native Animated API                 ║
-║  STORAGE (local)   AsyncStorage + Expo SecureStore          ║
-║  STORAGE (cloud)   Firebase Firestore                        ║
-║  AUTH              Expo LocalAuthentication (Biometrics)     ║
-║  NOTIFICATIONS     Expo Notifications                        ║
+║  STORAGE (local)   AsyncStorage                              ║
+║  STORAGE (cloud)   Firebase Firestore (REST)                 ║
+║  LOCK              Expo LocalAuthentication                  ║
+║  NOTIFICATIONS     Expo Notifications (yearly triggers)      ║
 ║  EMAIL             EmailJS                                   ║
-║  CALENDAR          expo-calendar (dev build only)            ║
+║  CALENDAR          expo-calendar (device build only)         ║
+║  UPDATES           expo-updates (EAS Update, OTA)            ║
 ║  CI/CD             GitHub Actions                            ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
@@ -162,61 +113,65 @@
 
 ---
 
-## `05` ── GETTING STARTED
+## `04` ── GETTING STARTED
 
-<br/>
-
-### Prerequisites
-
-Make sure you have the following installed:
-
-```bash
-node >= 18.0.0
-npm >= 9.0.0
-expo-cli (latest)
-```
-
-<br/>
-
-### Installation
-
-**1. Clone the repo**
+Requirements: Node 20.19+ (Node 24 recommended) and npm 10+.
 
 ```bash
 git clone https://github.com/eshaan-kolloth/Birthday_Buddy.git
 cd Birthday_Buddy
-```
-
-**2. Install dependencies**
-
-```bash
 npm install
+cp .env.example .env   # then fill it in — see section 09
 ```
 
-**3. Set up environment variables**
-
-Create a `.env` file in the root directory (see [Environment Variables](#09--environment-variables)):
+Start the dev server:
 
 ```bash
-cp .env.example .env
-# Fill in your keys
+npm start          # opens in Expo Go (project must match Expo Go's SDK)
+npm run dev        # opens in your development build (recommended, see section 05)
 ```
 
-**4. Start the development server**
+Other scripts:
 
 ```bash
-npx expo start
+npm run typecheck  # TypeScript
+npm run lint       # ESLint
+npm test           # unit tests (Node's built-in runner)
 ```
 
-**5. Run on your device**
-
-- Install **Expo Go** from the App Store / Play Store
-- Scan the QR code from the terminal
-- Or press `a` for Android emulator, `i` for iOS simulator
+> ⚡ Calendar sync and some biometric features need a **development build**; they are limited in Expo Go.
 
 <br/>
 
-> ⚡ **Note:** Some features (calendar integration, full biometrics) require a **development build** instead of Expo Go. See [Building a Dev Build](#development-build) below.
+---
+
+## `05` ── KEEPING UP WITH EXPO SDK RELEASES
+
+**The problem.** Expo Go on an iPhone updates itself through the App Store and can only open the _latest_ Expo SDK ("Project is incompatible with this version of Expo Go"). Each time Expo ships a new SDK, a project that has not upgraded stops opening.
+
+**An installed app cannot upgrade its own SDK.** The SDK is compiled into the app binary. What _can_ be automatic is everything around it, and that is what this repo sets up:
+
+| Layer | What it does | Setup |
+| --- | --- | --- |
+| **Early warning** | `npm start` prints a warning as soon as a newer SDK exists. | none |
+| **Automatic upgrade PR** | `.github/workflows/expo-sdk-watch.yml` checks weekly, runs `expo install --fix`, runs typecheck/lint/tests and opens a PR (a draft if something broke). Merging it is one click. | Enable _Settings → Actions → General → Allow GitHub Actions to create and approve pull requests_ |
+| **CI** | `.github/workflows/ci.yml` runs typecheck, lint and tests on every push/PR. | none |
+| **Automatic OTA updates** | `.github/workflows/eas-update.yml` publishes every green push to `main` with EAS Update. Installed builds download it in the background and apply it while the app is locked. | Add an `EXPO_TOKEN` repository secret ([create one](https://expo.dev/settings/access-tokens)) |
+| **Safe by construction** | `runtimeVersion` uses the `fingerprint` policy, so an update is only ever delivered to builds whose native code matches. An SDK upgrade can never be pushed to an old binary. | already configured |
+
+**Stop depending on Expo Go (the permanent fix).** A _development build_ is your own copy of the Expo Go shell, pinned to your project's SDK. It never auto-updates to a different SDK:
+
+```bash
+npm install -g eas-cli
+eas login
+eas build --profile development --platform android   # free
+eas build --profile development --platform ios       # needs an Apple Developer account
+npm run dev                                          # starts Metro for the dev build
+```
+
+Install the resulting build once, then keep developing with `npm run dev`. You only rebuild when you upgrade the SDK or add a native module. (A physical iPhone can only run a development build if you have an Apple Developer Program membership; without one, Expo Go is the only option and upgrading the SDK promptly — which the PR bot above automates — is the way to stay compatible.)
+
+**When an SDK upgrade lands:** merge the PR, then run `eas build` for the profiles you use. OTA updates cannot change the SDK, which is exactly why `fingerprint` keeps old builds on old JS until they are rebuilt.
 
 <br/>
 
@@ -224,35 +179,34 @@ npx expo start
 
 ## `06` ── PROJECT STRUCTURE
 
-<br/>
-
 ```
 Birthday_Buddy/
+├── app/                         # Expo Router screens (routes only)
+│   ├── _layout.tsx              # Lock gate, re-lock, OTA updates, tabs
+│   ├── index.tsx                # Chat tab (AI assistant + Add / View / Edit)
+│   ├── BirthdaysScreen.tsx      # Birthday list + search
+│   └── StatsScreen.tsx          # Analytics
 │
-├── app/                        # Expo Router screens
-│   ├── _layout.tsx             # Root layout + tab navigation
-│   ├── index.tsx               # AI Chat screen
-│   ├── BirthdaysScreen.tsx     # Birthday list + management
-│   ├── StatsScreen.tsx         # Analytics dashboard
-│   └── LockScreen.tsx          # Biometric lock screen
+├── components/                  # LockScreen, modals, calendar, chat bubbles, …
 │
-├── utils/                      # Core logic
-│   ├── storage.ts              # AsyncStorage + Birthday CRUD
-│   ├── notifications.ts        # Push notifications + email triggers
-│   ├── calendar.ts             # Calendar integration (dev build)
-│   ├── email.ts                # EmailJS integration
-│   └── firebase.ts             # Firestore cloud sync
+├── utils/
+│   ├── birthdayService.ts       # The ONE place that changes birthdays
+│   ├── storage.ts               # AsyncStorage (serialised, corruption-safe)
+│   ├── cloudStorage.ts          # Firestore REST + offline write queue
+│   ├── notifications.ts         # Yearly reminders + email checks
+│   ├── calendar.ts              # Device calendar
+│   ├── email.ts                 # EmailJS
+│   ├── dates.ts                 # Shared date logic (leap days, countdowns)
+│   ├── chatActions.ts           # Parses the AI's SAVE/DELETE tags
+│   ├── appUpdates.ts            # OTA update hook
+│   └── *.test.mjs               # Unit tests
 │
-├── constants/
-│   └── theme.ts                # Color palette + design tokens
+├── scripts/
+│   ├── sendBirthdayEmails.js    # Daily GitHub Action job
+│   └── checkSdk.js              # SDK early-warning (runs on npm start)
 │
-├── .github/
-│   └── workflows/
-│       └── birthday-emails.yml # GitHub Actions daily cron
-│
-├── assets/                     # Images, fonts, icons
-├── app.json                    # Expo config
-└── package.json
+├── constants/                   # theme.ts, config.ts
+└── .github/workflows/           # birthday-emails, ci, eas-update, expo-sdk-watch
 ```
 
 <br/>
@@ -261,76 +215,13 @@ Birthday_Buddy/
 
 ## `07` ── HOW IT WORKS
 
-<br/>
+**Every change goes through `utils/birthdayService.ts`.** Adding, editing or deleting — from a modal, the list, or the chat AI — updates local storage first, then reminders, the device calendar and the cloud, so they can't drift apart.
 
-### 🔔 Notification System
+**Reminders.** All reminders are rebuilt after each change and use yearly repeating triggers, grouped by date.
 
-```
-USER OPENS APP
-      │
-      ▼
-┌─────────────────────────────────┐
-│  scheduleAllBirthdayNotifications│
-│  (runs on every app unlock)      │
-└──────────────┬──────────────────┘
-               │
-               ▼
-    For each birthday:
-    ┌─────────────────────────┐
-    │  • Schedule 9 AM alert  │  ← Day before birthday
-    │  • Schedule 12 AM alert │  ← Day of birthday
-    └─────────────────────────┘
-               │
-               ▼
-    Notifications fire even
-    when app is CLOSED ✅
-```
+**Cloud backup.** Writes go into a persisted queue and are retried until Firestore accepts them. On a **fresh install** the list is restored from the cloud. Once a day the app also pushes anything the cloud is missing. It never deletes cloud data it does not know about, so this is a backup — **not** live multi-device sync: edits made on a second device are not merged back.
 
-<br/>
-
-### 📧 Email System
-
-```
-USER OPENS APP ON BIRTHDAY DAY
-              │
-              ▼
-   checkAndSendBirthdayEmails()
-              │
-    ┌─────────┴─────────┐
-    │                   │
-    ▼                   ▼
-Is today          Is tomorrow
-birthday?         birthday?
-    │                   │
-    ▼                   ▼
-Send "today"      Send "tomorrow"
-email via         email via
-EmailJS           EmailJS
-    │                   │
-    └─────────┬─────────┘
-              │
-              ▼
-    Stamp timestamp in
-    AsyncStorage to prevent
-    duplicate emails ✅
-```
-
-<br/>
-
-### ☁️ Firebase Sync
-
-```
-LOCAL CHANGE (add/edit/delete)
-          │
-          ▼
-   AsyncStorage (instant)
-          │
-          ▼
-   Firestore sync (background)
-          │
-          ▼
-   Available on all devices ✅
-```
+**Emails.** Whoever runs first (the app or the GitHub Action) records a marker in `users/<id>/emailLog`; the other one skips it. The Firestore rules must allow that collection (see section 10).
 
 <br/>
 
@@ -338,58 +229,16 @@ LOCAL CHANGE (add/edit/delete)
 
 ## `08` ── AUTOMATION: GITHUB ACTIONS
 
-<br/>
+| Workflow | When | What |
+| --- | --- | --- |
+| `birthday-emails.yml` | daily, 09:00 IST | Emails today's/tomorrow's birthdays. The job **fails visibly** if any email fails. |
+| `ci.yml` | push / PR | typecheck, lint, tests |
+| `eas-update.yml` | push to `main` | Publishes an OTA update (needs `EXPO_TOKEN`) |
+| `expo-sdk-watch.yml` | weekly | Opens an Expo SDK upgrade PR |
 
-> This feature sends birthday emails **automatically every day at 9 AM** — even if you never open the app.
+Secrets for the email job: `FIREBASE_SERVICE_ACCOUNT_KEY` (the Firebase **admin** JSON, pasted as a secret — never committed), `EMAILJS_SERVICE_ID`, `EMAILJS_TEMPLATE_ID`, `EMAILJS_PUBLIC_KEY`.
 
-<br/>
-
-### How it works
-
-A GitHub Actions workflow runs on a daily cron schedule. It:
-
-1. Fetches all birthdays from Firebase Firestore
-2. Checks if any birthday is **today** or **tomorrow**
-3. Sends the email via EmailJS
-4. Done — zero interaction needed
-
-<br/>
-
-### Setup (coming soon)
-
-```bash
-# Secrets to add to your GitHub repo:
-FIREBASE_SERVICE_ACCOUNT_KEY   # Firebase admin SDK JSON
-EMAILJS_SERVICE_ID
-EMAILJS_TEMPLATE_ID
-EMAILJS_PUBLIC_KEY
-```
-
-<br/>
-
-```yaml
-# .github/workflows/birthday-emails.yml
-name: Daily Birthday Emails
-on:
-  schedule:
-    - cron: "0 3 * * *" # 9 AM IST = 3:30 AM UTC
-  workflow_dispatch:
-
-jobs:
-  send-emails:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-      - run: node scripts/sendBirthdayEmails.js
-        env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
-          EMAILJS_SERVICE_ID: ${{ secrets.EMAILJS_SERVICE_ID }}
-          EMAILJS_TEMPLATE_ID: ${{ secrets.EMAILJS_TEMPLATE_ID }}
-          EMAILJS_PUBLIC_KEY: ${{ secrets.EMAILJS_PUBLIC_KEY }}
-```
+> GitHub switches off scheduled workflows in a repository that has had no activity for 60 days. If the daily emails ever stop, open the Actions tab and re-enable them.
 
 <br/>
 
@@ -397,85 +246,49 @@ jobs:
 
 ## `09` ── ENVIRONMENT VARIABLES
 
-<br/>
-
-Create a `.env` file in the project root with the following:
+Copy `.env.example` to `.env`:
 
 ```env
-# ── EmailJS ──────────────────────────────────────
-EMAILJS_SERVICE_ID=your_service_id
-EMAILJS_TEMPLATE_ID=your_template_id
-EMAILJS_PUBLIC_KEY=your_public_key
-
-# ── Firebase ─────────────────────────────────────
-FIREBASE_API_KEY=your_api_key
-FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-FIREBASE_PROJECT_ID=your_project_id
-FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-FIREBASE_APP_ID=your_app_id
-```
-
-<br/>
-
-> ⚠️ **Never commit your `.env` file to Git.** It's already in `.gitignore`. If you accidentally push keys, rotate them immediately.
-
-<br/>
-
----
-
-## `10` ── ROADMAP
-
-<br/>
-
-```
- STATUS    FEATURE
- ──────    ─────────────────────────────────────────────────────
-   ✅      Biometric lock screen
-   ✅      Birthday CRUD with relationship tags
-   ✅      Push notifications (day-before + birthday)
-   ✅      Email reminders via EmailJS
-   ✅      Spam prevention (once-per-day lock)
-   ✅      Firebase cloud sync
-   ✅      Stats & analytics screen
-   ✅      AI chat assistant
-   🔜      GitHub Actions automated daily emails
-   🔜      Development build (calendar + full features)
-   🔜      Birthday photo attachments
-   🔜      Custom notification tones
-   🔜      Widget for home screen
-   🔜      Apple Watch / Wear OS companion
-   🔜      Birthday wishes template generator
-   🔜      Multi-language support
+EXPO_PUBLIC_GROQ_API_KEY=
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=
+EXPO_PUBLIC_EMAILJS_SERVICE_ID=
+EXPO_PUBLIC_EMAILJS_TEMPLATE_ID=
+EXPO_PUBLIC_EMAILJS_PUBLIC_KEY=
+# optional
+EXPO_PUBLIC_CHAT_API_URL=      # your own proxy, keeps the key out of the app
+EXPO_PUBLIC_CHAT_MODEL=
+EXPO_PUBLIC_CLOUD_USER_ID=
 ```
 
 <br/>
 
 ---
 
-## `11` ── CONTRIBUTING
+## `10` ── SECURITY NOTES
+
+- **`EXPO_PUBLIC_*` values are inside the app bundle.** Anyone with the app can read the Groq key. Set a spending limit on it, or point `EXPO_PUBLIC_CHAT_API_URL` at a small proxy that holds the key.
+- **Firestore is accessed without authentication.** The rules therefore have to allow open read/write on `users/<id>/birthdays` and `users/<id>/emailLog`, which means anyone who knows the project id can read or change that data. For a personal app this is a trade-off; to close it, add Firebase Authentication and restrict the rules to your uid.
+- **Chat sends your saved birthdays (names, dates, relationships) to the AI provider** with each message.
+- **Never commit the Firebase admin key.** It is git-ignored (`*adminsdk*.json`); keep the only copy in the `FIREBASE_SERVICE_ACCOUNT_KEY` Actions secret and move the local file out of the project folder.
+- Birthdays stored on the device are not encrypted; the lock screen protects the app UI, not the storage.
 
 <br/>
 
-Contributions are welcome! Here's how:
+---
 
-```bash
-# 1. Fork the repository
-# 2. Create your feature branch
-git checkout -b feature/your-amazing-feature
+## `11` ── ROADMAP
 
-# 3. Commit your changes
-git commit -m "feat: add amazing feature"
-
-# 4. Push to your branch
-git push origin feature/your-amazing-feature
-
-# 5. Open a Pull Request
 ```
-
-<br/>
-
-Please follow the existing code style and add comments for complex logic.
+ ✅  Lock screen with re-lock
+ ✅  Birthday CRUD, search, notes
+ ✅  Yearly reminders + shared-dedupe emails
+ ✅  Offline-safe cloud backup
+ ✅  Stats, calendar, AI assistant
+ ✅  Automatic OTA updates + SDK upgrade PRs
+ 🔜  Firebase Auth (close the open Firestore rules)
+ 🔜  Live multi-device sync (needs delete tombstones)
+ 🔜  Birthday photos, home-screen widget, custom tones
+```
 
 <br/>
 
@@ -483,38 +296,4 @@ Please follow the existing code style and add comments for complex logic.
 
 ## `12` ── LICENSE
 
-<br/>
-
-```
-MIT License
-
-Copyright (c) 2025 Eshaan Kolloth
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction...
-```
-
-Full license text: [LICENSE](./LICENSE)
-
-<br/>
-
----
-
-<div align="center">
-
-```
-╔═══════════════════════════════════════════════════════════╗
-║                                                           ║
-║   Built with  ♥  by  Eshaan Kolloth                      ║
-║                                                           ║
-║   [ NEVER MISS WHAT MATTERS ]                            ║
-║                                                           ║
-╚═══════════════════════════════════════════════════════════╝
-```
-
-<br/>
-
-**[⬆ Back to top](#)**
-
-</div>
+MIT — see [LICENSE](./LICENSE). Built with ♥ by Eshaan Kolloth.

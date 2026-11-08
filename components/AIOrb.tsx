@@ -1,17 +1,18 @@
-import { useEffect, useRef } from "react";
+import { useState } from "react";
 import { Animated, Easing, View } from "react-native";
 import Svg, { Circle, Line, Polygon } from "react-native-svg";
 import { COLORS } from "../constants/theme";
+import { useAnimations } from "../utils/animation";
 
 export default function AIOrb() {
-  const corePulse = useRef(new Animated.Value(1)).current;
-  const glowOpacity = useRef(new Animated.Value(0.3)).current;
-  const ringRotate = useRef(new Animated.Value(0)).current;
-  const hexPulse = useRef(new Animated.Value(0.6)).current;
+  const [corePulse] = useState(() => new Animated.Value(1));
+  const [glowOpacity] = useState(() => new Animated.Value(0.3));
+  const [ringRotate] = useState(() => new Animated.Value(0));
+  const [hexPulse] = useState(() => new Animated.Value(0.6));
 
-  useEffect(() => {
+  useAnimations((run) => {
     // Core dot pulse
-    Animated.loop(
+    run(Animated.loop(
       Animated.sequence([
         Animated.timing(corePulse, {
           toValue: 1.35,
@@ -26,10 +27,10 @@ export default function AIOrb() {
           useNativeDriver: true,
         }),
       ]),
-    ).start();
+    ));
 
     // Glow breathe
-    Animated.loop(
+    run(Animated.loop(
       Animated.sequence([
         Animated.timing(glowOpacity, {
           toValue: 0.75,
@@ -44,20 +45,20 @@ export default function AIOrb() {
           useNativeDriver: true,
         }),
       ]),
-    ).start();
+    ));
 
     // Ring spin
-    Animated.loop(
+    run(Animated.loop(
       Animated.timing(ringRotate, {
         toValue: 1,
         duration: 4000,
         easing: Easing.linear,
         useNativeDriver: true,
       }),
-    ).start();
+    ));
 
     // Hex breathe
-    Animated.loop(
+    run(Animated.loop(
       Animated.sequence([
         Animated.timing(hexPulse, {
           toValue: 1,
@@ -72,7 +73,7 @@ export default function AIOrb() {
           useNativeDriver: true,
         }),
       ]),
-    ).start();
+    ));
   }, []);
 
   const ringRotateDeg = ringRotate.interpolate({

@@ -10,16 +10,13 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSFaceIDUsageDescription": "BirthdayBuddy uses Face ID to keep your friends' birthdays private and secure.",
         "ITSAppUsesNonExemptEncryption": false
       },
       "bundleIdentifier": "com.eshaan.birthdaybuddy"
     },
     "plugins": [
-      "expo-secure-store",
       "expo-router",
       "expo-font",
-      "expo-image",
       [
         "expo-splash-screen",
         {
@@ -33,7 +30,20 @@
         }
       ],
       "expo-status-bar",
-      "expo-web-browser"
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "BirthdayBuddy adds each birthday to its own calendar so you get reminders on your devices.",
+          "remindersPermission": "BirthdayBuddy does not use reminders."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "BirthdayBuddy uses Face ID to keep your friends' birthdays private and secure."
+        }
+      ],
+      "expo-notifications"
     ],
     "extra": {
       "router": {},
@@ -42,12 +52,15 @@
       }
     },
     "runtimeVersion": {
-      "policy": "appVersion"
+      "policy": "fingerprint"
     },
     "updates": {
-      "url": "https://u.expo.dev/42cd51d5-5fef-4a0c-a846-2cf968b81d1f"
+      "url": "https://u.expo.dev/42cd51d5-5fef-4a0c-a846-2cf968b81d1f",
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
     },
     "android": {
+      "package": "com.eshaan.birthdaybuddy",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

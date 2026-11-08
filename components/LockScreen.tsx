@@ -4,12 +4,14 @@ import {
   Animated,
   Dimensions,
   Easing,
+  Platform,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import Svg, { Circle, Line, Polygon } from "react-native-svg";
 import { COLORS } from "../constants/theme";
+import { useAnimations } from "../utils/animation";
 
 const { width, height } = Dimensions.get("window");
 
@@ -25,14 +27,6 @@ const SYSTEM_LOGS = [
   "AWAITING IDENTITY SCAN...",
   "ALL SYSTEMS NOMINAL...",
 ];
-
-const HEX_CHARS = "0123456789ABCDEF";
-const randomHex = () =>
-  "0x" +
-  Array.from(
-    { length: 4 },
-    () => HEX_CHARS[Math.floor(Math.random() * 16)],
-  ).join("");
 
 const PARTICLES = Array.from({ length: 14 }, (_, i) => ({
   id: i,
@@ -50,51 +44,43 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
   const [showPopup, setShowPopup] = useState(false);
   const [currentLog, setCurrentLog] = useState(0);
   const [currentTime, setCurrentTime] = useState("");
-  const [hexCodes, setHexCodes] = useState([
-    "0xA4F2",
-    "0xB91C",
-    "0xFF03",
-    "0x7E2A",
-  ]);
   const [signalBars, setSignalBars] = useState([1, 1, 1, 1, 1]);
   const [matrixChars, setMatrixChars] = useState<string[]>([]);
-  const [dataStream, setDataStream] = useState<string[]>([]);
+  const [notice, setNotice] = useState("");
+  const unlockTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Core anims
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const titleSlide = useRef(new Animated.Value(-40)).current;
-  const btnScale = useRef(new Animated.Value(0)).current;
-  const ring1Anim = useRef(new Animated.Value(0)).current;
-  const ring2Anim = useRef(new Animated.Value(0)).current;
-  const ring3Anim = useRef(new Animated.Value(0)).current;
-  const coreScale = useRef(new Animated.Value(1)).current;
-  const glowOpacity = useRef(new Animated.Value(0.3)).current;
-  const hexAnim = useRef(new Animated.Value(0.5)).current;
-  const blinkAnim = useRef(new Animated.Value(1)).current;
-  const logAnim = useRef(new Animated.Value(1)).current;
-  const shakeAnim = useRef(new Animated.Value(0)).current;
-  const hexFade = useRef(new Animated.Value(1)).current;
-  const signalAnim = useRef(new Animated.Value(0)).current;
-  const dataAnim = useRef(new Animated.Value(1)).current;
+  const [fadeAnim] = useState(() => new Animated.Value(0));
+  const [titleSlide] = useState(() => new Animated.Value(-40));
+  const [btnScale] = useState(() => new Animated.Value(0));
+  const [ring1Anim] = useState(() => new Animated.Value(0));
+  const [ring2Anim] = useState(() => new Animated.Value(0));
+  const [ring3Anim] = useState(() => new Animated.Value(0));
+  const [coreScale] = useState(() => new Animated.Value(1));
+  const [glowOpacity] = useState(() => new Animated.Value(0.3));
+  const [hexAnim] = useState(() => new Animated.Value(0.5));
+  const [blinkAnim] = useState(() => new Animated.Value(1));
+  const [logAnim] = useState(() => new Animated.Value(1));
+  const [shakeAnim] = useState(() => new Animated.Value(0));
 
   // Ripple — using scale instead of width/height to avoid the error
-  const ripple1Scale = useRef(new Animated.Value(0.5)).current;
-  const ripple1Opacity = useRef(new Animated.Value(0)).current;
-  const ripple2Scale = useRef(new Animated.Value(0.5)).current;
-  const ripple2Opacity = useRef(new Animated.Value(0)).current;
-  const ripple3Scale = useRef(new Animated.Value(0.5)).current;
-  const ripple3Opacity = useRef(new Animated.Value(0)).current;
+  const [ripple1Scale] = useState(() => new Animated.Value(0.5));
+  const [ripple1Opacity] = useState(() => new Animated.Value(0));
+  const [ripple2Scale] = useState(() => new Animated.Value(0.5));
+  const [ripple2Opacity] = useState(() => new Animated.Value(0));
+  const [ripple3Scale] = useState(() => new Animated.Value(0.5));
+  const [ripple3Opacity] = useState(() => new Animated.Value(0));
 
   // Particle anims
-  const particleAnims = useRef(
+  const [particleAnims] = useState(() =>
     PARTICLES.map(() => new Animated.Value(0)),
-  ).current;
+  );
 
   // Popup anims
-  const popupScale = useRef(new Animated.Value(0)).current;
-  const popupOpacity = useRef(new Animated.Value(0)).current;
-  const checkAnim = useRef(new Animated.Value(0)).current;
-  const popupGlow = useRef(new Animated.Value(0)).current;
+  const [popupScale] = useState(() => new Animated.Value(0));
+  const [popupOpacity] = useState(() => new Animated.Value(0));
+  const [checkAnim] = useState(() => new Animated.Value(0));
+  const [popupGlow] = useState(() => new Animated.Value(0));
 
   // Clock
   useEffect(() => {
@@ -127,26 +113,7 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
       setCurrentLog((p) => (p + 1) % SYSTEM_LOGS.length);
     }, 2200);
     return () => clearInterval(id);
-  }, []);
-
-  // Hex codes flicker
-  useEffect(() => {
-    const id = setInterval(() => {
-      Animated.sequence([
-        Animated.timing(hexFade, {
-          toValue: 0.2,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-        Animated.timing(hexFade, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-      setHexCodes([randomHex(), randomHex(), randomHex(), randomHex()]);
-    }, 700);
-    return () => clearInterval(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- interval is set up once; logAnim is a stable Animated.Value
   }, []);
 
   // Signal bars animate
@@ -154,35 +121,6 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
     const id = setInterval(() => {
       setSignalBars((prev) => prev.map(() => (Math.random() > 0.3 ? 1 : 0.3)));
     }, 800);
-    return () => clearInterval(id);
-  }, []);
-
-  // Data stream
-  useEffect(() => {
-    const chars = "01∑∆Ω∏√∞≈≠αβγδεζη";
-    const gen = () =>
-      Array.from({ length: 6 }, () =>
-        Array.from(
-          { length: 6 },
-          () => chars[Math.floor(Math.random() * chars.length)],
-        ).join(" "),
-      );
-    setDataStream(gen());
-    const id = setInterval(() => {
-      Animated.sequence([
-        Animated.timing(dataAnim, {
-          toValue: 0.3,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        Animated.timing(dataAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-      setDataStream(gen());
-    }, 500);
     return () => clearInterval(id);
   }, []);
 
@@ -194,6 +132,7 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
         { length: 40 },
         () => chars[Math.floor(Math.random() * chars.length)],
       );
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- seeds the first frame before the interval starts
     setMatrixChars(gen());
     const id = setInterval(() => setMatrixChars(gen()), 600);
     return () => clearInterval(id);
@@ -234,9 +173,9 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
       ]),
     );
 
-  useEffect(() => {
+  useAnimations((run) => {
     // Entrance
-    Animated.parallel([
+    run(Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 1200,
@@ -255,36 +194,36 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
         delay: 800,
         useNativeDriver: true,
       }),
-    ]).start();
+    ]));
 
     // Rings
-    Animated.loop(
+    run(Animated.loop(
       Animated.timing(ring1Anim, {
         toValue: 1,
         duration: 5000,
         easing: Easing.linear,
         useNativeDriver: true,
       }),
-    ).start();
-    Animated.loop(
+    ));
+    run(Animated.loop(
       Animated.timing(ring2Anim, {
         toValue: 1,
         duration: 8000,
         easing: Easing.linear,
         useNativeDriver: true,
       }),
-    ).start();
-    Animated.loop(
+    ));
+    run(Animated.loop(
       Animated.timing(ring3Anim, {
         toValue: 1,
         duration: 13000,
         easing: Easing.linear,
         useNativeDriver: true,
       }),
-    ).start();
+    ));
 
     // Core pulse
-    Animated.loop(
+    run(Animated.loop(
       Animated.sequence([
         Animated.timing(coreScale, {
           toValue: 1.4,
@@ -299,10 +238,10 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
           useNativeDriver: true,
         }),
       ]),
-    ).start();
+    ));
 
     // Glow breathe
-    Animated.loop(
+    run(Animated.loop(
       Animated.sequence([
         Animated.timing(glowOpacity, {
           toValue: 1,
@@ -317,10 +256,10 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
           useNativeDriver: true,
         }),
       ]),
-    ).start();
+    ));
 
     // Hex breathe
-    Animated.loop(
+    run(Animated.loop(
       Animated.sequence([
         Animated.timing(hexAnim, {
           toValue: 1,
@@ -335,10 +274,10 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
           useNativeDriver: true,
         }),
       ]),
-    ).start();
+    ));
 
     // Blink
-    Animated.loop(
+    run(Animated.loop(
       Animated.sequence([
         Animated.timing(blinkAnim, {
           toValue: 0,
@@ -351,43 +290,33 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
           useNativeDriver: true,
         }),
       ]),
-    ).start();
-
-    // Signal anim
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(signalAnim, {
-          toValue: 1,
-          duration: 1000,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(signalAnim, {
-          toValue: 0.4,
-          duration: 1000,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ]),
-    ).start();
+    ));
 
     // Ripples — fixed with scale
-    makeRipple(ripple1Scale, ripple1Opacity, 0).start();
-    makeRipple(ripple2Scale, ripple2Opacity, 900).start();
-    makeRipple(ripple3Scale, ripple3Opacity, 1800).start();
+    run(makeRipple(ripple1Scale, ripple1Opacity, 0));
+    run(makeRipple(ripple2Scale, ripple2Opacity, 900));
+    run(makeRipple(ripple3Scale, ripple3Opacity, 1800));
 
     // Particles
     PARTICLES.forEach((p, i) => {
-      Animated.loop(
+      run(Animated.loop(
         Animated.timing(particleAnims[i], {
           toValue: 1,
           duration: p.speed,
           easing: Easing.linear,
           useNativeDriver: true,
         }),
-      ).start();
+      ));
     });
   }, []);
+
+  // Don't call onUnlock after this screen has been removed.
+  useEffect(
+    () => () => {
+      if (unlockTimer.current) clearTimeout(unlockTimer.current);
+    },
+    [],
+  );
 
   const showAccessGranted = () => {
     setShowPopup(true);
@@ -428,7 +357,7 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
       ]),
     ).start();
 
-    setTimeout(() => {
+    unlockTimer.current = setTimeout(() => {
       Animated.parallel([
         Animated.timing(popupOpacity, {
           toValue: 0,
@@ -447,65 +376,49 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
     }, 3800);
   };
 
+  const grant = () => {
+    setStatus("granted");
+    showAccessGranted();
+  };
+
+  const deny = () => {
+    setStatus("denied");
+    const step = (toValue: number) =>
+      Animated.timing(shakeAnim, { toValue, duration: 60, useNativeDriver: true });
+    Animated.sequence([15, -15, 12, -12, 8, -8, 0].map(step)).start(() =>
+      setTimeout(() => setStatus("idle"), 2000),
+    );
+  };
+
   const handleAuthenticate = async () => {
     setStatus("scanning");
-    const hasHardware = await LocalAuthentication.hasHardwareAsync();
-    const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-    const result = await LocalAuthentication.authenticateAsync({
-      promptMessage: "Enter your passcode to access BirthdayBuddy",
-      fallbackLabel: "Use Passcode",
-      disableDeviceFallback: false,
-      ...(hasHardware && isEnrolled
-        ? {
-            authenticationType: [
-              LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION,
-            ],
-          }
-        : {}),
-    });
-
-    if (result.success) {
-      setStatus("granted");
-      showAccessGranted();
-    } else {
-      setStatus("denied");
-      Animated.sequence([
-        Animated.timing(shakeAnim, {
-          toValue: 15,
-          duration: 60,
-          useNativeDriver: true,
-        }),
-        Animated.timing(shakeAnim, {
-          toValue: -15,
-          duration: 60,
-          useNativeDriver: true,
-        }),
-        Animated.timing(shakeAnim, {
-          toValue: 12,
-          duration: 60,
-          useNativeDriver: true,
-        }),
-        Animated.timing(shakeAnim, {
-          toValue: -12,
-          duration: 60,
-          useNativeDriver: true,
-        }),
-        Animated.timing(shakeAnim, {
-          toValue: 8,
-          duration: 60,
-          useNativeDriver: true,
-        }),
-        Animated.timing(shakeAnim, {
-          toValue: -8,
-          duration: 60,
-          useNativeDriver: true,
-        }),
-        Animated.timing(shakeAnim, {
-          toValue: 0,
-          duration: 60,
-          useNativeDriver: true,
-        }),
-      ]).start(() => setTimeout(() => setStatus("idle"), 2000));
+    setNotice("");
+    try {
+      // The web has no biometrics API.
+      if (Platform.OS === "web") {
+        grant();
+        return;
+      }
+      // With no screen lock there is nothing to verify against; without this
+      // check the app could never be opened on such a device.
+      const level = await LocalAuthentication.getEnrolledLevelAsync();
+      if (level === LocalAuthentication.SecurityLevel.NONE) {
+        setNotice(
+          "No screen lock is set on this device, so there is nothing to verify.",
+        );
+        grant();
+        return;
+      }
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: "Unlock BirthdayBuddy",
+        fallbackLabel: "Use Passcode",
+        disableDeviceFallback: false,
+      });
+      if (result.success) grant();
+      else deny();
+    } catch (e) {
+      console.error("Authentication failed:", e);
+      deny();
     }
   };
 
@@ -596,7 +509,7 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
             style={{
               color: COLORS.cyan,
               fontFamily: "Exo2_400Regular",
-              fontSize: 9,
+              fontSize: 10,
               width: width / 10,
               textAlign: "center",
               marginVertical: 3,
@@ -663,7 +576,7 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
             style={{
               color: COLORS.green,
               fontFamily: "Orbitron_700Bold",
-              fontSize: 9,
+              fontSize: 10,
               letterSpacing: 3,
             }}
           >
@@ -1027,7 +940,7 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
               style={{
                 color: COLORS.textMuted,
                 fontFamily: "Exo2_400Regular",
-                fontSize: 9,
+                fontSize: 10,
                 letterSpacing: 1,
                 marginLeft: 6,
               }}
@@ -1064,7 +977,7 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
                   style={{
                     color: item.color,
                     fontFamily: "Exo2_400Regular",
-                    fontSize: 8,
+                    fontSize: 10,
                     letterSpacing: 1,
                   }}
                 >
@@ -1100,9 +1013,25 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
                 : "✕  IDENTITY NOT RECOGNIZED"}
         </Animated.Text>
 
+        {notice ? (
+          <Text
+            style={{
+              color: COLORS.textSecondary,
+              fontFamily: "Exo2_400Regular",
+              fontSize: 11,
+              textAlign: "center",
+              marginBottom: 12,
+            }}
+          >
+            {notice}
+          </Text>
+        ) : null}
+
         {/* ── BUTTON ── */}
         <TouchableOpacity
           onPress={handleAuthenticate}
+          accessibilityRole="button"
+          accessibilityLabel="Unlock BirthdayBuddy"
           disabled={status === "scanning" || status === "granted"}
           activeOpacity={0.8}
           style={{
@@ -1294,7 +1223,7 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
                     style={{
                       color: COLORS.green,
                       fontFamily: "Orbitron_700Bold",
-                      fontSize: 9,
+                      fontSize: 10,
                       letterSpacing: 1,
                     }}
                   >
@@ -1304,7 +1233,7 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
                     style={{
                       color: COLORS.textMuted,
                       fontFamily: "Exo2_400Regular",
-                      fontSize: 9,
+                      fontSize: 10,
                       letterSpacing: 1,
                       marginTop: 2,
                     }}

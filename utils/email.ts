@@ -1,24 +1,18 @@
+import { EMAILJS } from "../constants/config";
+import { MONTHS_FULL } from "./dates";
 import { Birthday } from "./storage";
 
-const MONTHS_FULL = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
+export const isEmailConfigured = () =>
+  Boolean(EMAILJS.serviceId && EMAILJS.templateId && EMAILJS.publicKey);
 
 export const sendBirthdayEmail = async (
   birthday: Birthday,
   isToday: boolean,
 ): Promise<void> => {
+  if (!isEmailConfigured()) {
+    throw new Error("EmailJS is not configured (EXPO_PUBLIC_EMAILJS_* missing).");
+  }
+
   const message = isToday
     ? `🎉 Today is ${birthday.name}'s birthday! Don't forget to wish them right now!`
     : `🎂 Tomorrow is ${birthday.name}'s birthday! Get ready to wish them!`;
@@ -39,9 +33,9 @@ export const sendBirthdayEmail = async (
       origin: "http://localhost",
     },
     body: JSON.stringify({
-      service_id: process.env.EXPO_PUBLIC_EMAILJS_SERVICE_ID,
-      template_id: process.env.EXPO_PUBLIC_EMAILJS_TEMPLATE_ID,
-      user_id: process.env.EXPO_PUBLIC_EMAILJS_PUBLIC_KEY,
+      service_id: EMAILJS.serviceId,
+      template_id: EMAILJS.templateId,
+      user_id: EMAILJS.publicKey,
       template_params: templateParams,
     }),
   });

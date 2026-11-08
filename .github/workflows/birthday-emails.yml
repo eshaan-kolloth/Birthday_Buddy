@@ -2,12 +2,23 @@ name: Send Birthday Emails
 
 on:
   schedule:
-    - cron: "30 3 * * *" # Runs at 9:00 AM IST every day
+    - cron: "30 3 * * *" # 03:30 UTC = 09:00 IST, every day
   workflow_dispatch: # Allows manual trigger from GitHub
+
+permissions:
+  contents: read
+
+concurrency:
+  group: birthday-emails
+  cancel-in-progress: false
 
 jobs:
   send-emails:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      # "Today" and "tomorrow" are evaluated in the owner's time zone.
+      TZ: Asia/Kolkata
 
     steps:
       - name: Checkout code
@@ -16,10 +27,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Install dependencies
-        run: npm install firebase-admin
+        # Not saved to package.json: the app itself never uses firebase-admin.
+        run: npm install --no-save --no-audit --no-fund firebase-admin@14
 
       - name: Run birthday email script
         env:
@@ -27,4 +39,5 @@ jobs:
           EMAILJS_SERVICE_ID: ${{ secrets.EMAILJS_SERVICE_ID }}
           EMAILJS_TEMPLATE_ID: ${{ secrets.EMAILJS_TEMPLATE_ID }}
           EMAILJS_PUBLIC_KEY: ${{ secrets.EMAILJS_PUBLIC_KEY }}
+        # Exits non-zero if any email fails, so a broken run is never green.
         run: node scripts/sendBirthdayEmails.js

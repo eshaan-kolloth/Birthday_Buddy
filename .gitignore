@@ -30,9 +30,15 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
+# local env files (copy .env.example to .env)
 .env
 .env*.local
+
+# Credentials: service-account / admin keys must NEVER be committed.
+# The GitHub Action reads its copy from the FIREBASE_SERVICE_ACCOUNT_KEY secret.
+*adminsdk*.json
+*service-account*.json
+*serviceAccount*.json
 
 # typescript
 *.tsbuildinfo
