@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "prestart": "node scripts/checkSdk.js",
-    "start": "expo start",
+    "start": "expo start --go",
     "dev": "expo start --dev-client",
     "android": "expo start --android",
     "ios": "expo start --ios",

@@ -127,8 +127,8 @@ cp .env.example .env   # then fill it in — see section 09
 Start the dev server:
 
 ```bash
-npm start          # opens in Expo Go (project must match Expo Go's SDK)
-npm run dev        # opens in your development build (recommended, see section 05)
+npm start          # forces Expo Go (the project must match Expo Go's SDK)
+npm run dev        # your development build (recommended, see section 05)
 ```
 
 Other scripts:
